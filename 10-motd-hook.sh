@@ -1,3 +1,5 @@
 #!/bin/bash
 
-/usr/bin/motd-update.sh
+if [ -x /usr/bin/motd-update.sh ]; then
+    /usr/bin/motd-update.sh
+fi

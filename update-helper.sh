@@ -2,7 +2,9 @@
 
 function help() {
     echo "update trigger helper"
-    echo "usage: update-helper [options]"
+    echo "usage: update-helper [options] [PATH]"
+    echo ""
+    echo " PATH: Run update scripts in a chroot located at PATH (does not use systemd)"
     echo ""
     echo "options:"
     echo " --reexec -r: Will run daemon-reexec instead of daemon-reload (only used with systemctl)"
@@ -14,6 +16,7 @@ function help() {
 update() {
     local block_flag=""
     local reexec=
+    local prefix="/"
 
     for var in "$@"; do
         case "$var" in
@@ -28,14 +31,17 @@ update() {
                 reexec=1
                 ;;
             *)
-                help
-                exit -1
+                if [ "$prefix" != "/" ]; then
+                    help
+                    exit -1
+                fi
+                prefix="$var"
                 ;;
         esac
     done
 
     systemctl &> /dev/null
-    if [ $? -eq 0 ]; then
+    if [ $? -eq 0 ] && [ -z "${prefix}" ]; then
         if [ ! -z "${reexec}" ]; then
             systemctl daemon-reexec
         else
@@ -44,9 +50,9 @@ update() {
         systemctl restart "${block_flag}" update-triggers.target
     else # Not using systemd as init
         if [ -z "${block_flag}" ]; then
-            /usr/libexec/update-trigger.sh
+            "${prefix}/usr/libexec/updater/update-trigger.sh" "${prefix}"
         else
-            /usr/libexec/update-trigger.sh &
+            "${prefix}/usr/libexec/updater/update-trigger.sh" "${prefix}" &
         fi
     fi
 }
