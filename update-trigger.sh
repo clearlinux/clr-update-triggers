@@ -6,9 +6,9 @@ prefix="$1"
 for f in "${prefix}"/usr/libexec/updater/*hook.sh ; do
     if [ -x "$f" ] && [ -f "$f" ]; then
         if [ "$prefix" == "/" ]; then
-            "$f"
+            "$f" &> /dev/null
         else
-            chroot "$prefix" "${f#$prefix}"
+            chroot "$prefix" "${f#$prefix}" &> /dev/null
         fi
     fi
 done
