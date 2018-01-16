@@ -41,14 +41,15 @@ update() {
     done
 
     systemctl &> /dev/null
-    if [ $? -eq 0 ] && [ -z "${prefix}" ]; then
+    # Check if systemd is init and not being run for a chroot update
+    if [ $? -eq 0 ] && [ "${prefix}" = "/" ]; then
         if [ ! -z "${reexec}" ]; then
             systemctl daemon-reexec
         else
             systemctl daemon-reload
         fi
         systemctl restart "${block_flag}" update-triggers.target
-    else # Not using systemd as init
+    else # Not using systemd as init, run the trigger scripts
         if [ -z "${block_flag}" ]; then
             "${prefix}/usr/libexec/updater/update-trigger.sh" "${prefix}"
         else
