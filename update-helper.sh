@@ -48,6 +48,12 @@ update() {
         else
             systemctl daemon-reload
         fi
+
+        # make sure daemons are restarted if needed, first
+        if [ -x /usr/bin/clr-service-restart ]; then
+            /usr/bin/clr-service-restart
+        fi
+
         systemctl restart "${block_flag}" update-triggers.target
     else # Not using systemd as init, run the trigger scripts
         if [ -z "${block_flag}" ]; then
